@@ -11,6 +11,7 @@ import com.amazonaws.services.lambda.runtime.RequestHandler;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class InsertReviewLambda implements RequestHandler<Map<String, Object>, String> {
 
@@ -23,6 +24,11 @@ public class InsertReviewLambda implements RequestHandler<Map<String, Object>, S
 
         String productId = (String) input.get("product_id");
         List<String> reviewList = (List<String>) input.get("review_texts");
+
+        int totalContent = reviewList.stream().mapToInt(String::length).sum();
+
+        if (totalContent > 10000)
+            return "Content exceeded 10000 char limit!";
 
         Table table = dynamoDB.getTable(TABLE_NAME);
 
